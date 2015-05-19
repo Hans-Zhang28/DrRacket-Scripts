@@ -1,0 +1,66 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname convex) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;;
+;;*******************************************************
+;; Zhenghan Zhang (20517543)
+;; CS 135 Fall 2014 
+;; Assignment 4 Question 5
+;;*******************************************************
+;;
+
+(define polygon-a (cons (make-posn 1 1)
+                        (cons (make-posn -1 2)
+                              (cons (make-posn -1 -3) empty))))
+(define polygon-b (cons (make-posn 1 1)
+                        (cons (make-posn -1 2)
+                              (cons (make-posn -1 -3)
+                                    (cons (make-posn 3 4) empty)))))
+(define polygon-c (cons (make-posn 1 1)
+                        (cons (make-posn -1 2)
+                              (cons (make-posn -1 -3)
+                                    (cons (make-posn -3 -4) empty)))))
+(define polygon-d (cons (make-posn 1 1)
+                        (cons (make-posn -1 1)
+                              (cons (make-posn -1 -1)
+                                    (cons (make-posn 1 -1) empty)))))
+(define polygon-d (cons (make-posn 1 1)
+                        (cons (make-posn -1 1)
+                              (cons (make-posn -1 -1)
+                                    (cons (make-posn 1 -1) empty)))))
+
+
+
+;; (convex? lo-posn) produces true if the polygon specified by the given  
+;; list is convex, and false otherwise.
+;; concex?: (listof Posn) -> Bool                                         
+;; Requires: at least 3 entries.
+;; Examples:
+
+
+(define (convex? lo-posn)
+  (cond[(empty? (rest lo-posn))true]
+       [(empty? (rest(rest(rest lo-posn))))true]
+       [(zero? (*(- (posn-y (first(rest lo-posn)))(posn-y (first lo-posn)))
+                 (- (posn-y (first(rest(rest lo-posn))))(posn-y (first(rest lo-posn))))
+                 (- (posn-y (first(rest(rest(rest lo-posn)))))(posn-y (first(rest(rest lo-posn)))))))
+        (convex? (rest lo-posn))]                                                                       
+       [(> (* (/ (- (posn-x (first(rest lo-posn)))(posn-x (first lo-posn)))
+              (- (posn-y (first(rest lo-posn)))(posn-y (first lo-posn))))
+                (/ (- (posn-x (first(rest(rest lo-posn))))(posn-x (first(rest lo-posn))))
+              (- (posn-y (first(rest(rest lo-posn))))(posn-y (first(rest lo-posn)))))
+                (/ (- (posn-x (first(rest(rest(rest lo-posn)))))(posn-x (first(rest(rest lo-posn)))))
+              (- (posn-y (first(rest(rest(rest lo-posn)))))(posn-y (first(rest(rest lo-posn)))))))0)false]
+       [else (convex? (rest lo-posn))]))
+
+;; Tests   
+(check-expect (convex? polygon-a) true)
+(check-expect (convex? polygon-b) true)
+(check-expect (convex? polygon-c) true)
+(check-expect (convex? polygon-d) true)
+(check-expect (convex? polygon-) true)
+
+
+
+   
+   

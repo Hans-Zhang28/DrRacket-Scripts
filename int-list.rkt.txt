@@ -1,0 +1,102 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname int-list) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;;
+;;*****************************************************
+;; Zhenghan Zhang (20517543)
+;; CS 135 Fall 2014
+;; Assignment 4 Question 2
+;;*****************************************************
+;;
+
+
+;; (count-squares loi) produces the number of perfect 
+;; squares in the given list.
+;; count-squares: (listof Int) -> Nat
+;; Examples 
+(check-expect (count-squares (cons 25(cons 34(cons 4 empty))))
+              2)
+(check-expect (count-squares (cons 49(cons 9(cons 4 empty))))
+              3)
+
+(define (count-squares loi)
+  (cond [(empty? loi) 0]
+        [(integer? (sqrt (first loi)))
+         (add1 (count-squares (rest loi)))]
+        [else (count-squares (rest loi))]))
+
+;;Tests 
+(check-expect (count-squares (cons 0(cons 0(cons 2 empty))))
+              2) 
+(check-expect (count-squares empty) 0)
+(check-expect (count-squares (cons 8(cons 5(cons 2 empty))))
+              0)
+
+
+;; (square-ints loi) produces a list whose ith entry is 
+;; the square of the ith entry of the original list.
+;; square-ints: (listof Int) -> (listof Nat)                             
+;; Examples 
+(check-expect (square-ints (cons 0(cons 0(cons 2 empty))))
+              (cons 0(cons 0(cons 4 empty)))) 
+(check-expect (square-ints (cons -1(cons -2(cons -3 empty))))
+              (cons 1(cons 4(cons 9 empty))))
+
+(define (square-ints loi)
+  (cond [(empty? loi) empty]
+        [else (cons(sqr (first loi))(square-ints (rest loi)))]))
+
+;;Tests
+(check-expect (square-ints (cons 0(cons 0(cons 0 empty))))
+              (cons 0(cons 0(cons 0 empty))))
+(check-expect (square-ints (cons 4(cons -2(cons 0 empty))))
+              (cons 16(cons 4(cons 0 empty))))
+(check-expect (square-ints empty)empty)
+
+
+;; (ascending? loi) produces true if the entries of the list             
+;; appear in a strictly increasing order, and false ptherwise. 
+;; ascending?: (listof Int) -> Bool                                       
+;; Examples
+(check-expect (ascending? (cons -1(cons -2(cons -3 empty))))
+              false)
+(check-expect (ascending? (cons -1(cons 0(cons 1 empty))))
+              true)
+
+(define (ascending? loi)
+  (cond [(empty? (rest loi))true]
+        [(< (first loi)(first(rest loi)))(ascending?(rest loi))]
+        [else false]))
+
+;;Tests
+(check-expect (ascending? (cons 8(cons 9(cons 1 empty))))
+              false)
+(check-expect (ascending? (cons 1(cons 1(cons 1 empty))))
+              false)
+(check-expect (ascending? (cons 5(cons 10(cons 0 empty))))
+              false)
+
+;; (cumulative-gain loi) produces the cumulative elevation gain           
+;; gain of the list.
+;; cumulative-gain: (listof Int) -> Nat                                   
+;; Examples
+(check-expect (cumulative-gain (cons 1(cons 3(cons -6
+                                                   (cons 0 empty)))))8)
+(check-expect (cumulative-gain (cons 1(cons 0(cons 0
+                                                   (cons 0 empty)))))0)
+
+(define (cumulative-gain loi)
+  (cond [(empty? (rest loi)) 0]
+        [(< (first loi)(first(rest loi)))
+         (+ (- (first(rest loi))(first loi))
+            (cumulative-gain(rest loi)))]
+        [else (cumulative-gain(rest loi))]))
+;;Tests
+(check-expect (cumulative-gain (cons 1 empty))0)
+(check-expect (cumulative-gain (cons 4(cons 9 empty)))5)
+(check-expect (cumulative-gain (cons 1(cons 10(cons -9
+                                                    (cons -7 empty)))))11)
+(check-expect (cumulative-gain (cons 1(cons 0(cons -1
+                                                   (cons 10 empty)))))11)
+(check-expect (cumulative-gain (cons 1(cons -2(cons -1
+                                                    (cons 4 empty)))))6)

@@ -1,0 +1,164 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname pizza) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+;;
+;;*********************************************************
+;; Zhenghan Zhang (20517543)
+;; CS 135 Fall 2014
+;; Assignment 4 Question 2
+;;*********************************************************
+;;
+
+(define-struct pizza (size std-top prm-top))
+;; A Pizza is a (make-pizza Sym (listof Std-Top)(listof Prm-Top))
+
+(define chicken-large
+  (make-pizza 'large empty 
+              (cons 'chicken empty)))
+(define onions-small
+  (make-pizza 'small 
+              (cons 'onions empty) empty))
+(define bacon-broccoli-medium
+  (make-pizza 'medium 
+              (cons 'bacon empty)
+              (cons 'broccoli empty)))
+(define tomatoes-bacon-xl
+  (make-pizza 'xl 
+              (cons 'bacon(cons 'tomatoes empty))
+              empty))
+(define xl(make-pizza 'xl empty empty))
+(define double-chicken-large 
+  (make-pizza 'large empty 
+              (cons 'chicken(cons 'chicken empty))))
+(define double-bacon-medium 
+  (make-pizza 'medium 
+              (cons 'bacon(cons 'bacon empty)) empty))
+(define double-bacon-triple-feta-cheese-xl 
+  (make-pizza 'xl 
+              (cons 'bacon(cons 'bacon empty))
+              (cons 'feta-cheese
+                    (cons 'feta-cheese
+                          (cons 'feta-cheese empty)))))
+
+;; (revenue-std-top standardtop) produces the price                    
+;; specified by standard topping only.
+;; revenue-std-top: (listof Std-Top) -> Num                              
+;; Examples
+(check-expect (revenue-std-top 
+               (cons 'bacon
+                     (cons 'bacon empty)))1.5)
+(check-expect (revenue-std-top 
+               (cons 'onions empty))0.75)
+
+(define (revenue-std-top standardtop)
+  (cond
+    [(empty? standardtop)0]
+    [else(+ 0.75 (revenue-std-top (rest standardtop)))]))
+
+;;Tests
+(check-expect (revenue-std-top  empty)0)
+(check-expect (revenue-std-top 
+               (cons 'pepperoni 
+                     (cons 'tomatoes 
+                           (cons 'onions empty))))2.25)
+
+;;(revenue-std-top standardtop) produces the price
+;; specified by premium topping only.
+;; revenue-prm-top: (listof Prm-Top) -> Num                               
+;; Examples
+(check-expect (revenue-prm-top  empty)0)
+(check-expect (revenue-prm-top 
+               (cons 'feta-cheese 
+                     (cons 'chicken 
+                           (cons 'chicken empty))))3.75)
+
+
+(define (revenue-prm-top premiumtop)
+  (cond
+    [(empty? premiumtop)0]
+    [else(+ 1.25 (revenue-prm-top (rest premiumtop)))]))
+
+;;Tests
+(check-expect (revenue-prm-top 
+               (cons 'feta-cheese
+                     (cons 'broccoli empty)))2.5)
+(check-expect (revenue-prm-top (cons 'chicken empty))1.25)
+
+
+;; (revenue lo-pizza) produces the total price of                              
+;; all the pizzas in the given list.  
+;; revenue: (listof Pizza) -> Num                                              
+;; Examples 
+(check-expect (revenue (cons chicken-large empty))9.75)
+(check-expect (revenue (cons onions-small empty))5.75)
+
+(define (revenue lo-pizza)
+  (cond 
+    [(symbol=? (pizza-size (first lo-pizza)) 'small)
+     (+ 5
+        (revenue-std-top (pizza-std-top(first lo-pizza)))
+        (revenue-prm-top (pizza-prm-top(first lo-pizza))))]
+    [(symbol=? (pizza-size (first lo-pizza)) 'medium)
+     (+ 7
+        (revenue-std-top (pizza-std-top(first lo-pizza)))
+        (revenue-prm-top (pizza-prm-top(first lo-pizza))))]
+    [(symbol=? (pizza-size (first lo-pizza)) 'large)
+     (+ 8.5
+        (revenue-std-top  (pizza-std-top(first lo-pizza)))
+        (revenue-prm-top (pizza-prm-top(first lo-pizza))))]
+    [(symbol=? (pizza-size (first lo-pizza)) 'xl)
+     (+ 10
+        (revenue-std-top (pizza-std-top(first lo-pizza)))
+        (revenue-prm-top (pizza-prm-top(first lo-pizza))))]))     
+
+;; Tests
+(check-expect (revenue (cons double-bacon-medium empty))8.5)
+(check-expect (revenue (cons double-chicken-large empty))11)
+(check-expect (revenue (cons xl empty))10)
+(check-expect (revenue (cons bacon-broccoli-medium empty))9)
+(check-expect (revenue (cons tomatoes-bacon-xl empty))11.5)
+(check-expect (revenue 
+               (cons double-bacon-triple-feta-cheese-xl empty))15.25)
+
+;; (accommodate? pizza top) produces true if the order can be                 
+;; accommodated with the toppings that Racket Pizza has available
+;; and false otherwise.
+;; accommodate?: Pizza Sym -> Bool                                            
+;; Examples 
+(check-expect (accommodate? chicken-large 'chicken)false)
+(check-expect (accommodate? onions-small 'tamatoes)true)
+(check-expect (accommodate? chicken-large 'oninons)true)
+
+
+
+(define (accommodate? pizza top)
+  (cond
+    [(and (empty? (pizza-std-top pizza))
+          (empty? (pizza-prm-top pizza)))true]
+    [(and (not(empty?(pizza-std-top pizza)))
+          (symbol=? (first(pizza-std-top pizza))top)) false]
+    [(and (not(empty?(pizza-prm-top pizza)))
+          (symbol=? (first(pizza-prm-top pizza))top)) false]
+    [(empty?(pizza-std-top pizza)) 
+     (accommodate? 
+      (make-pizza 
+       (pizza-size pizza)empty(rest(pizza-prm-top pizza)))top)]
+    [(empty?(pizza-prm-top pizza)) 
+     (accommodate? 
+      (make-pizza (pizza-size pizza)(rest(pizza-std-top pizza))empty)top)]
+    [else(accommodate? (make-pizza (pizza-size pizza)
+                                   (rest(pizza-std-top pizza))
+                                   (rest(pizza-prm-top pizza)))top)]))
+
+;;Tests
+(check-expect (accommodate? tomatoes-bacon-xl 'tomatoes)false)
+(check-expect (accommodate? xl 'tomatoes)true)
+(check-expect (accommodate? bacon-broccoli-medium 'tomatoes)true)
+(check-expect (accommodate? double-bacon-triple-feta-cheese-xl 'bacon)false)
+(check-expect (accommodate? double-chicken-large 'pepperoni)true)
+(check-expect (accommodate? double-chicken-large 'chicken)false)
+(check-expect (accommodate? double-bacon-medium 'tomatoes)true)
+(check-expect (accommodate? double-bacon-triple-feta-cheese-xl 'tomatoes)true)
+
+
+
